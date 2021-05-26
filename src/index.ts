@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import Game1 from './scenes/Game1';
 import Preloader from './scenes/Preloader';
 
 
@@ -13,8 +14,8 @@ const config: Phaser.Types.Core.GameConfig = {
 			debug: true
 		},
 	},
-	transparent: false,
-	scene: [Preloader]
+	transparent: true,
+	scene: [Preloader, Game1]
 }
 
 export default new Phaser.Game(config)

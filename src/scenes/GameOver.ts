@@ -1,9 +1,9 @@
 import Phaser from "phaser";
 import SceneKeys from "../const/SceneKeys";
 
-export default class Preloader extends Phaser.Scene {
+export default class GameOver extends Phaser.Scene {
   constructor() {
-    super(SceneKeys.Preloader);
+    super(SceneKeys.GameOver);
   }
   preload() {
     this.load.image("ground", './assets/ground.png');

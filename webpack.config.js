@@ -34,6 +34,14 @@ module.exports = {
         test: /\.(?:ico|gif|png|jpg|ttf|m4a|jpeg)$/i,
         type: 'asset/resource',
       },
+      {
+        test: /\.(csv|tsv)$/i,
+        use: ['csv-loader'],
+      },
+      {
+        test: /\.xml$/i,
+        use: ['xml-loader'],
+      },
     ],
   },
   resolve: {
