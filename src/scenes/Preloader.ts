@@ -1,3 +1,4 @@
+import MapKeys from "../const/MapKeys";
 import Phaser from "phaser";
 import SceneKeys from "../const/SceneKeys";
 
@@ -34,9 +35,9 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("restart", './assets/restart.png');
     this.load.image("gameOver", './assets/game-over.png');
 
-    // this.load.tilemapTiledJSON(MapKeys.Stage1, "./assets/stage1.json");
+    this.load.tilemapTiledJSON(MapKeys.Stage1, "./assets/stage1.json");
   }
   create() {
-    this.scene.start(SceneKeys.Game1);
+    this.scene.start(SceneKeys.Begin);
   }
 }
