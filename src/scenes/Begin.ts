@@ -50,7 +50,7 @@ export default class Begin extends Phaser.Scene {
       add: false,
       x: 0,
       y: 0,
-      text: "Choose your character",
+      text: "Select your character",
       style: {
         fontSize: "64px",
         fontFamily: "Arial",
@@ -74,34 +74,38 @@ export default class Begin extends Phaser.Scene {
 
     const hitArea = new Phaser.Geom.Rectangle(0, 0, 100, 100);
     const hitAreaCallback = Phaser.Geom.Rectangle.Contains;
+    dinoGroup.setOrigin(0.5, 0.5);
     dinoGroup.setHitArea(hitArea, hitAreaCallback);
 
     this.input.on("gameobjectover", (pointer, gameObject) => {
-        highlighted.setAlpha(1);
+      highlighted.setAlpha(1);
       highlighted.setPosition(gameObject.x, gameObject.y);
     });
 
-    dinoGroup.getChildren().forEach((dino,index) => {
+    dinoGroup.getChildren().forEach((dino, index) => {
       dino.on("pointerdown", () => {
-          highlighted.setAlpha(0);
+        highlighted.setVisible(false);
         this.physics.add.existing(dino);
-        this.physics.world.gravity = new Phaser.Math.Vector2(0,0);
+        this.physics.world.gravity = new Phaser.Math.Vector2(0, 0);
         dino.body.velocity.y = -40;
-        dinoGroup.getChildren().splice(index,1);
-        // dinoGroup.setAlpha(0);
+        dinoGroup.getChildren().splice(index, 1);
+        text.setScale(0.5);
+        text.setText("You have choosen: " + dino.name + " dino");
         this.tweens.add({
-            targets: dinoGroup.getChildren(),
-            alpha: 0,
-            duration: 1000,
-            ease: 'Power2'
-          });
-        // this.cameras.main.startFollow(dino);
+          targets: dinoGroup.getChildren(),
+          alpha: 0,
+          duration: 1000,
+          ease: "Power2",
+        });
         setTimeout(() => {
-            dino.body.velocity.y = 0;
+          dino.body.velocity.y = 0;
         }, 2000);
+        setTimeout(() => {
+          this.scene.start(SceneKeys.Game1, {
+            name: dino.name,
+          });
+        }, 3000);
       });
     });
-
-    // this.scene.start(SceneKeys.Game1);
   }
 }

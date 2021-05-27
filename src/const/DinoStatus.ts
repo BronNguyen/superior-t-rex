@@ -1,4 +1,5 @@
 export enum DinoStatus {
+    Ready = "ready",
     Run = "run",
     Jump = "jump",
     Win = "win",
