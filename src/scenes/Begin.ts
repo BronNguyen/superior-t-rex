@@ -63,8 +63,8 @@ export default class Begin extends Phaser.Scene {
       y: 0,
       text: "Select your character",
       style: {
-        fontSize: "64px",
-        fontFamily: "Arial",
+        fontSize: "34px",
+        fontFamily: "CustomFont",
         color: "#ffffff",
         align: "center",
         backgroundColor: "#ff00ff",

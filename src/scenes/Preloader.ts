@@ -18,7 +18,8 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("heart", "./assets/heart.png");
     this.load.image("finishLine", "./assets/finish.png");
     this.load.image("paper", "./assets/paper.png");
-
+    this.load.image("shoe", "./assets/shoe.png");
+    this.load.image("shield", "./assets/shield.png");
     this.load.image("dinoIdle", "./assets/dino-idle.png");
 
     this.load.spritesheet("dinoHurt", "./assets/dino-hurt.png", {

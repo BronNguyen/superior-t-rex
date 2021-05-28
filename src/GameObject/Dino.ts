@@ -42,6 +42,9 @@ export default class Dino extends Physics.Arcade.Sprite {
     this.cursorKeys.down.on("down",() => {
       if (this.isPlayer) this.duck();
     })
+    this.cursorKeys.down.on("up",() => {
+      if(this.isPlayer) this.runAgain();
+    })
     this.initAnimation();
   }
 
@@ -52,7 +55,6 @@ export default class Dino extends Physics.Arcade.Sprite {
 
   run() {
     this.lives = this.maxLives;
-    this.dinoStatus = DinoStatus.Run;
     if (!this.isPlayer) {
       this.botsRun();
     } else {
@@ -73,11 +75,18 @@ export default class Dino extends Physics.Arcade.Sprite {
 
   duck() {
     if (this.body.blocked.down) {
-      this.body.setSize(62, 118);
+      this.body.setSize(118, 62);
       this.body.offset.y = 32;
+      this.dinoStatus = DinoStatus.Duck;
     } else {
       this.body.velocity.y += 600;
     }
+  }
+
+  runAgain() {
+    this.body.offset.y = 0;
+    this.body.setSize(88,94);
+    this.dinoStatus = DinoStatus.Run;
   }
 
   botsRun() {
@@ -128,6 +137,7 @@ export default class Dino extends Physics.Arcade.Sprite {
 
   playAnimation() {
     if (this.dinoStatus == DinoStatus.Run) this.play("dino-run-anim", true);
+    if (this.dinoStatus == DinoStatus.Duck) this.play("dino-duck-anim", true);
     if (this.dinoStatus == DinoStatus.Jump) this.play("dino-jump-anim", true);
     if (this.dinoStatus == DinoStatus.Hurt) this.play("dino-hurt-anim", true);
     if (this.dinoStatus == DinoStatus.Win) this.play("dino-fun-anim", true);
@@ -178,5 +188,24 @@ export default class Dino extends Physics.Arcade.Sprite {
   celebrate() {
     this.dinoStatus = DinoStatus.Win;
     this.body.stop();
+  }
+
+  handlePowerUp(string) {
+    if(string == 'shoe') this.becomeFaster();
+    if(string == 'shield') this.becomeInvincible();
+  }
+
+  becomeInvincible() {
+    this.isUnvulnerable = true;
+    this.scene.time.delayedCall(4000,() => {
+      this.isUnvulnerable = false;
+    })
+  }
+
+  becomeFaster() {
+    this.body.velocity.x += 300;
+    this.scene.time.delayedCall(4000,() => {
+      this.body.velocity.x -= 300;
+    })
   }
 }

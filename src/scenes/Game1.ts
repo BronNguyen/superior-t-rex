@@ -5,6 +5,7 @@ import { cyanDino, mintDino, blackDino, orangeDino } from "../const/DinoType";
 import { GameStatus } from "../const/GameStatus";
 import Enemy from "../GameObject/Enemy";
 import { enemyTypes } from "../const/EnemyType";
+import { powerUpTypes } from "../const/PowerUpTypes";
 
 export default class Game1 extends Phaser.Scene {
   private player!: Dino;
@@ -15,10 +16,10 @@ export default class Game1 extends Phaser.Scene {
   private finishLine!: Phaser.GameObjects.Image;
   gameStatus = GameStatus.Ready;
   private dinoGroup!: Phaser.GameObjects.Group;
+  private powerUpGroup!: Phaser.GameObjects.Group;
   private dinosRank: string[] = [];
   private sceneName!: string;
   private stageText!: GameObjects.Text;
-  private playerRankText!: GameObjects.Text;
   constructor() {
     super(SceneKeys.Game1);
   }
@@ -29,6 +30,7 @@ export default class Game1 extends Phaser.Scene {
     this.trackLength = data.length;
     this.sceneName = data.sceneName;
     this.enemies = this.physics.add.group();
+    this.powerUpGroup = this.add.group();
   }
 
   create() {
@@ -38,6 +40,7 @@ export default class Game1 extends Phaser.Scene {
     this.dinosInitiation();
     this.setDinoProperties(width, height);
     this.enemyInitiation();
+    this.powerUpInitiation();
     this.initColliders();
     this.showLives(width, height);
     this.eventHandler();
@@ -129,15 +132,35 @@ export default class Game1 extends Phaser.Scene {
   enemyInitiation() {
     const enemiesNumber = this.trackLength / 1000;
     Array.from(Array(enemiesNumber).keys()).forEach((index) => {
-      const enemy = new Enemy(
-        this,
-        Phaser.Math.Between((index - 1) * 1000, index * 1000),
-        <number>this.game.config.height,
-        enemyTypes[Phaser.Math.Between(0, 6)]
-      );
-      this.enemies.add(enemy);
-      enemy.setCollideWorldBounds(true);
-      return enemy;
+      if (index > 1) {
+        const enemy = new Enemy(
+          this,
+          Phaser.Math.Between((index - 1) * 1000, index * 1000),
+          <number>this.game.config.height,
+          enemyTypes[Phaser.Math.Between(0, 6)]
+        );
+        this.enemies.add(enemy);
+        enemy.setCollideWorldBounds(true);
+        return enemy;
+      }
+    });
+  }
+
+  powerUpInitiation() {
+    const powerUpsNumber = Math.floor(this.trackLength / 3000);
+    Array.from(Array(powerUpsNumber).keys()).forEach((index) => {
+      if (index > 1) {
+        const powerUp = new GameObjects.Image(
+          this,
+          Phaser.Math.Between((index - 1) * 3000, index * 3000),
+          300,
+          powerUpTypes[Phaser.Math.Between(0,1)].imgTexture
+        );
+        this.add.existing(powerUp);
+        this.physics.add.existing(powerUp,true);
+        this.powerUpGroup.add(powerUp);
+        return powerUp;
+      }
     });
   }
 
@@ -150,6 +173,17 @@ export default class Game1 extends Phaser.Scene {
         this.lifeUpdate();
       }
     );
+
+    this.physics.add.overlap(
+      this.dinoGroup,
+      this.powerUpGroup,
+      (_powerUp,_dino) => {
+        const powerUpType = (<GameObjects.Image>_powerUp.body.gameObject).texture.key;
+        (<Dino>_dino.body.gameObject).handlePowerUp(powerUpType);
+        _powerUp.destroy();
+      }
+    );
+
     this.physics.add.collider(
       this.finishLine,
       this.dinoGroup,
@@ -159,6 +193,7 @@ export default class Game1 extends Phaser.Scene {
         this.dinosRank.push(dinoInstance.name);
         dinoInstance.celebrate();
         if (this.player == dinoInstance) {
+          this.stageText.setText("Your Rank:" + this.dinosRank.length);
           if (this.dinosRank.length < 3) {
             this.confetti();
             this.cameras.main.flash();
@@ -197,29 +232,14 @@ export default class Game1 extends Phaser.Scene {
       y: 0,
       text: this.sceneName,
       style: {
-        fontSize: "64px",
-        fontFamily: "Arial",
+        fontSize: "34px",
+        fontFamily: "CustomFont",
         color: "#ffffff",
         align: "center",
         backgroundColor: "#ff00ff",
       },
     });
     this.add.existing(this.stageText).setScrollFactor(0);
-
-    // this.playerRankText = this.make.text({
-    //   add: false,
-    //   x: 0,
-    //   y: 0,
-    //   text: "Your Rank: " + (this.dinosRank.indexOf(this.player.name)+1),
-    //   style: {
-    //     fontSize: "64px",
-    //     fontFamily: "Arial",
-    //     color: "#ffffff",
-    //     align: "center",
-    //     backgroundColor: "#ff00ff",
-    //   },
-    // });
-    // this.add.existing(this.playerRankText).setScrollFactor(0);
   }
 
   showLives(width, height) {
@@ -263,7 +283,7 @@ export default class Game1 extends Phaser.Scene {
     this.scene.start(SceneKeys.Game1, {
       name: this.player.name,
       length: this.trackLength + 2000,
-      sceneName: "Stage " + (this.trackLength) / 2000,
+      sceneName: "Stage " + this.trackLength / 2000,
     });
   }
 
