@@ -3,6 +3,8 @@ import { Physics, Scene } from "phaser";
 import { DinoStatus } from "../const/DinoStatus";
 import {
   dinoDuckAnimConfig,
+  dinoFunAnimConfig,
+  dinoHurtAnimConfig,
   dinoJumpAnimConfig,
   dinoRunAnimConfig,
 } from "../Animation/Animation";
@@ -14,6 +16,7 @@ export default class Dino extends Physics.Arcade.Sprite {
   private lives!: number;
   private maxLives: number;
   private isPlayer!: boolean;
+  private isUnvulnerable = false;
   private dinoStatus = DinoStatus.Ready;
   cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
 
@@ -36,16 +39,15 @@ export default class Dino extends Physics.Arcade.Sprite {
     this.cursorKeys.space.on("down", () => {
       if (this.isPlayer) this.jump();
     });
+    this.cursorKeys.down.on("down",() => {
+      if (this.isPlayer) this.duck();
+    })
     this.initAnimation();
   }
 
   setPlayer() {
     this.isPlayer = true;
     return this;
-  }
-
-  setRunStatetus() {
-    this.dinoStatus = DinoStatus.Run;
   }
 
   run() {
@@ -66,6 +68,15 @@ export default class Dino extends Physics.Arcade.Sprite {
     ) {
       this.body.velocity.y = -1100;
       this.dinoStatus = DinoStatus.Jump;
+    }
+  }
+
+  duck() {
+    if (this.body.blocked.down) {
+      this.body.setSize(62, 118);
+      this.body.offset.y = 32;
+    } else {
+      this.body.velocity.y += 600;
     }
   }
 
@@ -92,28 +103,80 @@ export default class Dino extends Physics.Arcade.Sprite {
   }
 
   botsAuto(scene) {
+    if (this.isPlayer) return;
     if (scene.enemies.getChildren().length <= 0) return false;
-    const enemyArray =  <Enemy[]>scene.enemies.getChildren();
-    enemyArray.filter(e=>{
-      if(e.x> this.x) return true;
-      return false;
-    })
-    .forEach((e)=>{
-      if(e.x < this.x+160) {
-        !e.canFly?this.jump():true;
+    const enemyArray = <Enemy[]>scene.enemies.getChildren();
+    enemyArray
+      .filter((e) => {
+        if (e.x > this.x) return true;
+        return false;
+      })
+      .forEach((e) => {
+        if (e.x < this.x + 160) {
+          !e.canFly ? this.jump() : true;
+        }
+      });
+  }
+
+  setStatus() {
+    if (this.dinoStatus !== DinoStatus.Win) {
+      if (this.body.blocked.down && this.isUnvulnerable == false) {
+        this.dinoStatus = DinoStatus.Run;
       }
-    })
+    }
   }
 
   playAnimation() {
     if (this.dinoStatus == DinoStatus.Run) this.play("dino-run-anim", true);
     if (this.dinoStatus == DinoStatus.Jump) this.play("dino-jump-anim", true);
     if (this.dinoStatus == DinoStatus.Hurt) this.play("dino-hurt-anim", true);
+    if (this.dinoStatus == DinoStatus.Win) this.play("dino-fun-anim", true);
   }
 
   initAnimation() {
     this.scene.anims.create(dinoRunAnimConfig(this));
     this.scene.anims.create(dinoJumpAnimConfig(this));
+    this.scene.anims.create(dinoHurtAnimConfig(this));
+    this.scene.anims.create(dinoFunAnimConfig(this));
     this.scene.anims.create(dinoDuckAnimConfig(this));
+  }
+
+  beHurt() {
+    if (this.isUnvulnerable) return;
+    this.lives -= 1;
+    if (this.lives <= 0) this.die();
+    this.dinoStatus = DinoStatus.Hurt;
+    this.isUnvulnerable = true;
+    if (this.isUnvulnerable) {
+      this.scene.tweens.add({
+        targets: this,
+        duration: 100,
+        repeat: 10,
+        alpha: 0,
+        yoyo: true,
+      });
+    }
+    setTimeout(() => {
+      this.isUnvulnerable = false;
+      this.setStatus();
+    }, 2000);
+  }
+
+  die() {
+    if (!this.isPlayer) this.scene.events.emit("dinoDie", this);
+    else {
+      this.body.stop();
+      this.play("dino-hurt-anim");
+      this.anims.stop();
+    }
+  }
+
+  getLives() {
+    return this.lives;
+  }
+
+  celebrate() {
+    this.dinoStatus = DinoStatus.Win;
+    this.body.stop();
   }
 }

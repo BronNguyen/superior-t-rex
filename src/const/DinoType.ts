@@ -13,27 +13,27 @@ export default interface DinoType {
 export const cyanDino: DinoType = {
     name: "cyan",
     color: cyanColor,
-    speed: 300,
+    speed: 400,
     maxlives: 3,
 }
 
 export const orangeDino: DinoType = {
     name: "orange",
     color: orangeColor,
-    speed: 300,
+    speed: 400,
     maxlives: 3,
 }
 
 export const mintDino: DinoType = {
     name: "mint",
     color: mintColor,
-    speed: 300,
+    speed: 400,
     maxlives: 3,
 }
 
 export const blackDino: DinoType = {
     name: "black",
     color: blackColor,
-    speed: 300,
+    speed: 400,
     maxlives: 3,
 }

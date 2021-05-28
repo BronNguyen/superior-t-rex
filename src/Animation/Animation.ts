@@ -26,7 +26,14 @@ export const dinoJumpAnimConfig = (scene) => {
 export const dinoHurtAnimConfig = (scene) => {
   return {
     key: "dino-hurt-anim",
-    frames: scene.anims.generateFrameName("dinoHurt"),
+    frames: scene.anims.generateFrameNumbers("dinoHurt", {start: 0, end: 0}),
+  }
+}
+
+export const dinoFunAnimConfig = (scene) => {
+  return {
+    key: "dino-fun-anim",
+    frames: scene.anims.generateFrameNumbers("dinoFun", {start: 0, end: 0}),
   }
 }
 

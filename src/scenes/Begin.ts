@@ -1,14 +1,23 @@
 import SceneKeys from "../const/SceneKeys";
 import { mintDino, cyanDino, blackDino, orangeDino } from "../const/DinoType";
-import Phaser from "phaser";
+import Phaser, { GameObjects } from "phaser";
 import Dino from "../GameObject/Dino";
 
 export default class Begin extends Phaser.Scene {
+  dinoGroup!: GameObjects.Group;
+  text!: GameObjects.Text;
+  graphics;
   constructor() {
     super(SceneKeys.Begin);
   }
 
   create() {
+    this.dinoInitiation();
+    this.textInitiation();
+    this.highLightPlayer();
+  }
+
+  dinoInitiation() {
     //add dinos
     const cyan = new Dino(
       this,
@@ -39,14 +48,16 @@ export default class Begin extends Phaser.Scene {
       blackDino
     );
 
-    const dinoGroup = this.add.group();
-    dinoGroup.add(cyan);
-    dinoGroup.add(mint);
-    dinoGroup.add(orange);
-    dinoGroup.add(black);
-    // add text
+    this.dinoGroup = this.add.group();
+    this.dinoGroup.add(cyan);
+    this.dinoGroup.add(mint);
+    this.dinoGroup.add(orange);
+    this.dinoGroup.add(black);
+  }
 
-    const text = this.make.text({
+  textInitiation() {
+    // add text
+    this.text = this.make.text({
       add: false,
       x: 0,
       y: 0,
@@ -59,40 +70,43 @@ export default class Begin extends Phaser.Scene {
         backgroundColor: "#ff00ff",
       },
     });
-    this.add.existing(text);
-    const graphics = this.make.graphics({
+    this.add.existing(this.text);
+  }
+
+  highLightPlayer() {
+    this.graphics = this.make.graphics({
       x: 0,
       y: 0,
       add: false,
       fillStyle: { color: 0xff00ff, alpha: 1 },
     });
 
-    graphics.fillRect(0, 0, 100, 100).setDepth(0);
+    this.graphics.fillRect(0, 0, 100, 100).setDepth(0);
 
-    graphics.generateTexture("block", 100, 100);
+    this.graphics.generateTexture("block", 100, 100);
     const highlighted = this.add.image(100, 100, "block").setAlpha(0);
 
     const hitArea = new Phaser.Geom.Rectangle(0, 0, 100, 100);
     const hitAreaCallback = Phaser.Geom.Rectangle.Contains;
-    dinoGroup.setOrigin(0.5, 0.5);
-    dinoGroup.setHitArea(hitArea, hitAreaCallback);
+    this.dinoGroup.setOrigin(0.5, 0.5);
+    this.dinoGroup.setHitArea(hitArea, hitAreaCallback);
 
     this.input.on("gameobjectover", (pointer, gameObject) => {
       highlighted.setAlpha(1);
       highlighted.setPosition(gameObject.x, gameObject.y);
     });
 
-    dinoGroup.getChildren().forEach((dino, index) => {
+    this.dinoGroup.getChildren().forEach((dino, index) => {
       dino.on("pointerdown", () => {
         highlighted.setVisible(false);
         this.physics.add.existing(dino);
         this.physics.world.gravity = new Phaser.Math.Vector2(0, 0);
         dino.body.velocity.y = -40;
-        dinoGroup.getChildren().splice(index, 1);
-        text.setScale(0.5);
-        text.setText("You have choosen: " + dino.name + " dino");
+        this.dinoGroup.getChildren().splice(index, 1);
+        this.text.setScale(0.5);
+        this.text.setText("You have choosen: " + dino.name + " dino");
         this.tweens.add({
-          targets: dinoGroup.getChildren(),
+          targets: this.dinoGroup.getChildren(),
           alpha: 0,
           duration: 1000,
           ease: "Power2",
@@ -103,6 +117,8 @@ export default class Begin extends Phaser.Scene {
         setTimeout(() => {
           this.scene.start(SceneKeys.Game1, {
             name: dino.name,
+            length: 4000,
+            sceneName: "Stage 1",
           });
         }, 3000);
       });

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import GameOver from './scenes/GameOver';
 import Begin from './scenes/Begin';
 import Game1 from './scenes/Game1';
 import Preloader from './scenes/Preloader';
@@ -16,7 +17,7 @@ const config: Phaser.Types.Core.GameConfig = {
 		},
 	},
 	transparent: true,
-	scene: [Preloader, Begin, Game1]
+	scene: [Preloader, Begin, Game1, GameOver]
 }
 
 export default new Phaser.Game(config)

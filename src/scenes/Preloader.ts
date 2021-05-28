@@ -15,13 +15,22 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("enemy5", "./assets/cactuses_small_2.png");
     this.load.image("enemy6", "./assets/cactuses_small_3.png");
     this.load.image("cloud", "./assets/enemy-bird.png");
+    this.load.image("heart", "./assets/heart.png");
+    this.load.image("finishLine", "./assets/finish.png");
+    this.load.image("paper", "./assets/paper.png");
 
     this.load.image("dinoIdle", "./assets/dino-idle.png");
 
     this.load.spritesheet("dinoHurt", "./assets/dino-hurt.png", {
       frameWidth: 80,
-      frameHeight: 94,  
+      frameHeight: 94,
     });
+
+    this.load.spritesheet("dinoFun", "./assets/dino-fun.png", {
+      frameWidth: 80,
+      frameHeight: 86,
+    });
+
     this.load.spritesheet("dinoRun", "./assets/dino-run.png", {
       frameWidth: 88,
       frameHeight: 94,
