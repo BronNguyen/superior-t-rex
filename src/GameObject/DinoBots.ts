@@ -8,6 +8,11 @@ export default class DinoBots extends Dino {
     super(s, x, y, t, dinoType);
     this.scene = s;
   }
+
+  autoDuck() {
+    
+  }
+
   run() {
     this.lives = this.maxLives;
     const tween = this.scene.tweens.add({
@@ -29,7 +34,6 @@ export default class DinoBots extends Dino {
         },
       },
     });
-    this.botsAuto(this.scene);
   }
 
   botsAuto(scene) {

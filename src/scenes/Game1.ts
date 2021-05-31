@@ -19,6 +19,7 @@ export default class Game1 extends Phaser.Scene {
   gameStatus = GameStatus.Ready;
   private dinoGroup!: Phaser.GameObjects.Group;
   private powerUpGroup!: Phaser.GameObjects.Group;
+  private botDinos!: DinoBots[];
   private dinosRank: string[] = [];
   private sceneName!: string;
   private stageText!: GameObjects.Text;
@@ -79,7 +80,7 @@ export default class Game1 extends Phaser.Scene {
     );
     const dinoList = ["cyan", "orange", "mint", "black"];
     this.dinoGroup = this.physics.add.group();
-    const botDinos = dinoList
+    this.botDinos = dinoList
       .filter((dinoName) => {
         return dinoName !== this.playerColor;
       })
@@ -96,6 +97,7 @@ export default class Game1 extends Phaser.Scene {
         this.dinoGroup.add(newDino);
         return newDino;
       });
+
     this.player = new Player(this,spawnPoint.x,spawnPoint.y,"dinoIdle", dinoInstances.filter((dino) => {
       return dino.name == this.playerColor;
     })[0] ).setDepth(3);
@@ -277,6 +279,9 @@ export default class Game1 extends Phaser.Scene {
   }
 
   update(dt, t) {
+    this.botDinos.map((dino)=> {
+      dino.botsAuto(this);
+    });
     (<Dino[]>this.dinoGroup.getChildren()).forEach((dino) => {
       dino.setStatus();
       dino.playAnimation();

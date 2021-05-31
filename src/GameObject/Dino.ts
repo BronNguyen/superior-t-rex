@@ -66,8 +66,8 @@ export default class Dino extends Physics.Arcade.Sprite {
 
   setStatus() {
     if (this.dinoStatus !== DinoStatus.Win) {
-      if (this.body.blocked.down && this.isUnvulnerable == false) {
-        this.dinoStatus = DinoStatus.Run;
+      if (this.body.blocked.down) {
+        if (this.body.width != 118) this.dinoStatus = DinoStatus.Run ;else this.dinoStatus = DinoStatus.Duck;
       }
     }
   }
@@ -88,22 +88,25 @@ export default class Dino extends Physics.Arcade.Sprite {
     this.scene.anims.create(dinoDuckAnimConfig(this));
   }
 
+  handleInvincible(repeat: number) {
+    if (this.isUnvulnerable) {
+      this.scene.tweens.add({
+        targets: this,
+        duration: 100,
+        repeat: repeat,
+        alpha: 0,
+        yoyo: true,
+      });
+    }
+  }
+
   beHurt() {
     if (this.isUnvulnerable) return;
     this.lives -= 1;
     if (this.lives <= 0) this.die();
     this.dinoStatus = DinoStatus.Hurt;
     this.isUnvulnerable = true;
-    if (this.isUnvulnerable) {
-      this.scene.tweens.add({
-        targets: this,
-        duration: 100,
-        repeat: 10,
-        alpha: 0,
-        yoyo: true,
-      });
-    }
-
+    this.handleInvincible(10);
     setTimeout(() => {
       this.isUnvulnerable = false;
       this.setStatus();
@@ -132,6 +135,7 @@ export default class Dino extends Physics.Arcade.Sprite {
 
   becomeInvincible() {
     this.isUnvulnerable = true;
+    this.handleInvincible(20);
     this.scene.time.delayedCall(4000, () => {
       this.isUnvulnerable = false;
     });
