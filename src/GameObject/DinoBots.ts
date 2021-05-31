@@ -9,10 +9,6 @@ export default class DinoBots extends Dino {
     this.scene = s;
   }
 
-  autoDuck() {
-    
-  }
-
   run() {
     this.lives = this.maxLives;
     const tween = this.scene.tweens.add({
@@ -46,7 +42,14 @@ export default class DinoBots extends Dino {
       })
       .forEach((e) => {
         if (e.x < this.x + 160) {
-          !e.canFly ? this.jump() : true;
+          if(!e.canFly )
+          this.jump() ;
+          else{
+          this.duck();
+          this.scene.time.delayedCall(600,()=> {
+            this.runAgain();
+          })
+        }
         }
       });
   }
