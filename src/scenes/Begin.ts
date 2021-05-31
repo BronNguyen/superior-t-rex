@@ -1,5 +1,5 @@
 import SceneKeys from "../const/SceneKeys";
-import { mintDino, cyanDino, blackDino, orangeDino } from "../const/DinoType";
+import { dinoInstances } from "../const/DinoType";
 import Phaser, { GameObjects } from "phaser";
 import Dino from "../GameObject/Dino";
 
@@ -24,28 +24,28 @@ export default class Begin extends Phaser.Scene {
       100,
       <number>this.game.config.height / 2,
       "dinoIdle",
-      cyanDino
+      dinoInstances.filter((dino)=>{return dino.name == 'cyan'})[0]
     );
     const mint = new Dino(
       this,
       200,
       <number>this.game.config.height / 2,
       "dinoIdle",
-      mintDino
+      dinoInstances.filter((dino)=>{return dino.name == 'mint'})[0]
     );
     const orange = new Dino(
       this,
       300,
       <number>this.game.config.height / 2,
       "dinoIdle",
-      orangeDino
+      dinoInstances.filter((dino)=>{return dino.name == 'orange'})[0]
     );
     const black = new Dino(
       this,
       400,
       <number>this.game.config.height / 2,
       "dinoIdle",
-      blackDino
+      dinoInstances.filter((dino)=>{return dino.name == 'black'})[0]
     );
 
     this.dinoGroup = this.add.group();

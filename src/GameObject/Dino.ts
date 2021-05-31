@@ -11,14 +11,12 @@ import {
 import Enemy from "./Enemy";
 
 export default class Dino extends Physics.Arcade.Sprite {
-  private color;
-  private speed: number;
-  private lives!: number;
-  private maxLives: number;
-  private isPlayer!: boolean;
-  private isUnvulnerable = false;
-  private dinoStatus = DinoStatus.Ready;
-  cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
+  protected color;
+  protected speed: number;
+  protected lives!: number;
+  protected maxLives: number;
+  protected isUnvulnerable = false;
+  protected dinoStatus = DinoStatus.Ready;
 
   constructor(s: Scene, x: number, y: number, t: string, dinoType: DinoType) {
     super(s, x, y, t);
@@ -31,35 +29,12 @@ export default class Dino extends Physics.Arcade.Sprite {
     this.depth = 2;
     this.setOrigin(0, 1);
     this.scene.add.existing(this);
-
-    this.cursorKeys = this.scene.input.keyboard.createCursorKeys();
-    this.cursorKeys.up.on("down", () => {
-      if (this.isPlayer) this.jump();
-    });
-    this.cursorKeys.space.on("down", () => {
-      if (this.isPlayer) this.jump();
-    });
-    this.cursorKeys.down.on("down",() => {
-      if (this.isPlayer) this.duck();
-    })
-    this.cursorKeys.down.on("up",() => {
-      if(this.isPlayer) this.runAgain();
-    })
     this.initAnimation();
-  }
-
-  setPlayer() {
-    this.isPlayer = true;
-    return this;
   }
 
   run() {
     this.lives = this.maxLives;
-    if (!this.isPlayer) {
-      this.botsRun();
-    } else {
-      this.body.velocity.x = this.speed;
-    }
+    this.body.velocity.x = this.speed;
   }
 
   jump() {
@@ -85,46 +60,8 @@ export default class Dino extends Physics.Arcade.Sprite {
 
   runAgain() {
     this.body.offset.y = 0;
-    this.body.setSize(88,94);
+    this.body.setSize(88, 94);
     this.dinoStatus = DinoStatus.Run;
-  }
-
-  botsRun() {
-    const tween = this.scene.tweens.add({
-      targets: this.body.velocity,
-      props: {
-        x: {
-          duration: 4000,
-          yoyo: true,
-          repeat: -1,
-          ease: "Sine.easeInOut",
-          value: {
-            getEnd: (target, key, value) => {
-              return this.speed + 100 * Math.random();
-            },
-            getStart: (target, key, value) => {
-              return this.speed - 100 * Math.random();
-            },
-          },
-        },
-      },
-    });
-  }
-
-  botsAuto(scene) {
-    if (this.isPlayer) return;
-    if (scene.enemies.getChildren().length <= 0) return false;
-    const enemyArray = <Enemy[]>scene.enemies.getChildren();
-    enemyArray
-      .filter((e) => {
-        if (e.x > this.x) return true;
-        return false;
-      })
-      .forEach((e) => {
-        if (e.x < this.x + 160) {
-          !e.canFly ? this.jump() : true;
-        }
-      });
   }
 
   setStatus() {
@@ -166,6 +103,7 @@ export default class Dino extends Physics.Arcade.Sprite {
         yoyo: true,
       });
     }
+
     setTimeout(() => {
       this.isUnvulnerable = false;
       this.setStatus();
@@ -173,12 +111,9 @@ export default class Dino extends Physics.Arcade.Sprite {
   }
 
   die() {
-    if (!this.isPlayer) this.scene.events.emit("dinoDie", this);
-    else {
-      this.body.stop();
-      this.play("dino-hurt-anim");
-      this.anims.stop();
-    }
+    this.body.stop();
+    this.play("dino-hurt-anim");
+    this.anims.stop();
   }
 
   getLives() {
@@ -191,21 +126,21 @@ export default class Dino extends Physics.Arcade.Sprite {
   }
 
   handlePowerUp(string) {
-    if(string == 'shoe') this.becomeFaster();
-    if(string == 'shield') this.becomeInvincible();
+    if (string == "shoe") this.becomeFaster();
+    if (string == "shield") this.becomeInvincible();
   }
 
   becomeInvincible() {
     this.isUnvulnerable = true;
-    this.scene.time.delayedCall(4000,() => {
+    this.scene.time.delayedCall(4000, () => {
       this.isUnvulnerable = false;
-    })
+    });
   }
 
   becomeFaster() {
     this.body.velocity.x += 300;
-    this.scene.time.delayedCall(4000,() => {
+    this.scene.time.delayedCall(4000, () => {
       this.body.velocity.x -= 300;
-    })
+    });
   }
 }

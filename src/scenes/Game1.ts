@@ -1,11 +1,13 @@
 import Dino from "../GameObject/Dino";
 import Phaser, { GameObjects, Physics } from "phaser";
 import SceneKeys from "../const/SceneKeys";
-import { cyanDino, mintDino, blackDino, orangeDino } from "../const/DinoType";
+import { dinoInstances } from "../const/DinoType";
 import { GameStatus } from "../const/GameStatus";
 import Enemy from "../GameObject/Enemy";
 import { enemyTypes } from "../const/EnemyType";
 import { powerUpTypes } from "../const/PowerUpTypes";
+import DinoBots from "../GameObject/DinoBots";
+import Player from "../GameObject/Player";
 
 export default class Game1 extends Phaser.Scene {
   private player!: Dino;
@@ -37,7 +39,7 @@ export default class Game1 extends Phaser.Scene {
     const width = this.game.config.width;
     const height = this.game.config.height;
     this.stageSetup(width, height);
-    this.dinosInitiation();
+    this.dinosInitiation(width,height);
     this.setDinoProperties(width, height);
     this.enemyInitiation();
     this.powerUpInitiation();
@@ -64,69 +66,54 @@ export default class Game1 extends Phaser.Scene {
 
   setDinoProperties(width, height) {
     (<Dino[]>this.dinoGroup.getChildren()).forEach((dino) => {
-      if (dino.name === this.playerColor) {
-        this.player = dino;
-        dino.setDepth(3).setPlayer();
-        this.cameras.main.startFollow(
-          dino,
-          false,
-          1,
-          1,
-          -(<number>width) / 2 + dino.width / 2,
-          <number>height / 2
-        );
-        this.cameras.main.setBounds(
-          0,
-          0,
-          Number.MAX_SAFE_INTEGER,
-          <number>height
-        );
-      }
       const body = <Physics.Arcade.Body>dino.body;
       body.setCollideWorldBounds(true);
       dino.run();
     });
   }
 
-  dinosInitiation() {
+  dinosInitiation(width, height) {
     const spawnPoint = new Phaser.Math.Vector2(
       100,
       <number>this.game.config.height
     );
+    const dinoList = ["cyan", "orange", "mint", "black"];
     this.dinoGroup = this.physics.add.group();
-    const cyan = new Dino(
-      this,
-      spawnPoint.x,
-      spawnPoint.y,
-      "dinoIdle",
-      cyanDino
+    const botDinos = dinoList
+      .filter((dinoName) => {
+        return dinoName !== this.playerColor;
+      })
+      .map((dinoName) => {
+        const newDino = new DinoBots(
+          this,
+          spawnPoint.x,
+          spawnPoint.y,
+          "dinoIdle",
+          dinoInstances.filter((dino) => {
+            return dino.name == dinoName;
+          })[0]
+        );
+        this.dinoGroup.add(newDino);
+        return newDino;
+      });
+    this.player = new Player(this,spawnPoint.x,spawnPoint.y,"dinoIdle", dinoInstances.filter((dino) => {
+      return dino.name == this.playerColor;
+    })[0] ).setDepth(3);
+    this.cameras.main.startFollow(
+      this.player,
+      false,
+      1,
+      1,
+      -(<number>width) / 2 + this.player.width / 2,
+      <number>height / 2
     );
-    const mint = new Dino(
-      this,
-      spawnPoint.x,
-      spawnPoint.y,
-      "dinoIdle",
-      mintDino
+    this.cameras.main.setBounds(
+      0,
+      0,
+      Number.MAX_SAFE_INTEGER,
+      <number>height
     );
-    const orange = new Dino(
-      this,
-      spawnPoint.x,
-      spawnPoint.y,
-      "dinoIdle",
-      orangeDino
-    );
-    const black = new Dino(
-      this,
-      spawnPoint.x,
-      spawnPoint.y,
-      "dinoIdle",
-      blackDino
-    );
-
-    this.dinoGroup.add(cyan);
-    this.dinoGroup.add(mint);
-    this.dinoGroup.add(orange);
-    this.dinoGroup.add(black);
+    this.dinoGroup.add(this.player);
   }
 
   enemyInitiation() {
@@ -147,17 +134,17 @@ export default class Game1 extends Phaser.Scene {
   }
 
   powerUpInitiation() {
-    const powerUpsNumber = Math.floor(this.trackLength / 3000);
+    const powerUpsNumber = Math.floor(this.trackLength / 1000);
     Array.from(Array(powerUpsNumber).keys()).forEach((index) => {
       if (index > 1) {
         const powerUp = new GameObjects.Image(
           this,
-          Phaser.Math.Between((index - 1) * 3000, index * 3000),
+          Phaser.Math.Between((index - 1) * 1000, index * 1000),
           300,
-          powerUpTypes[Phaser.Math.Between(0,1)].imgTexture
+          powerUpTypes[Phaser.Math.Between(0, 1)].imgTexture
         );
         this.add.existing(powerUp);
-        this.physics.add.existing(powerUp,true);
+        this.physics.add.existing(powerUp, true);
         this.powerUpGroup.add(powerUp);
         return powerUp;
       }
@@ -177,9 +164,11 @@ export default class Game1 extends Phaser.Scene {
     this.physics.add.overlap(
       this.dinoGroup,
       this.powerUpGroup,
-      (_powerUp,_dino) => {
-        const powerUpType = (<GameObjects.Image>_powerUp.body.gameObject).texture.key;
-        (<Dino>_dino.body.gameObject).handlePowerUp(powerUpType);
+      (_powerUp, _dino) => {
+        const dinoInstance = <Dino>_dino.body.gameObject;
+        const powerUpType = (<GameObjects.Image>_powerUp.body.gameObject)
+          .texture.key;
+        dinoInstance.handlePowerUp(powerUpType);
         _powerUp.destroy();
       }
     );
@@ -291,7 +280,6 @@ export default class Game1 extends Phaser.Scene {
     (<Dino[]>this.dinoGroup.getChildren()).forEach((dino) => {
       dino.setStatus();
       dino.playAnimation();
-      dino.botsAuto(this);
     });
   }
 }
